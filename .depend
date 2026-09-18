@@ -1,0 +1,42 @@
+hal/hal-aw91xxx.o:\
+	hal/hal-aw91xxx.c\
+	plugin/plugin-config.h\
+	plugin/plugin-logging.h\
+	hal/hal-aw91xxx.h\
+
+hal/hal-aw91xxx.pic.o:\
+	hal/hal-aw91xxx.c\
+	plugin/plugin-config.h\
+	plugin/plugin-logging.h\
+	hal/hal-aw91xxx.h\
+
+plugin/plugin-api.o:\
+	plugin/plugin-api.c\
+	hal/hal-aw91xxx.h\
+	plugin/plugin-api.h\
+
+plugin/plugin-api.pic.o:\
+	plugin/plugin-api.c\
+	hal/hal-aw91xxx.h\
+	plugin/plugin-api.h\
+
+plugin/plugin-config.o:\
+	plugin/plugin-config.c\
+	plugin/plugin-config.h\
+	plugin/plugin-logging.h\
+
+plugin/plugin-config.pic.o:\
+	plugin/plugin-config.c\
+	plugin/plugin-config.h\
+	plugin/plugin-logging.h\
+
+plugin/plugin-logging.o:\
+	plugin/plugin-logging.c\
+	plugin/plugin-api.h\
+	plugin/plugin-logging.h\
+
+plugin/plugin-logging.pic.o:\
+	plugin/plugin-logging.c\
+	plugin/plugin-api.h\
+	plugin/plugin-logging.h\
+
