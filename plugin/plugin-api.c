@@ -37,6 +37,8 @@
 
 #include "plugin-api.h"
 
+#include "plugin-logging.h"
+
 #include "../hal/hal-aw91xxx.h"
 
 /* ========================================================================= *
@@ -61,6 +63,28 @@ mce_hybris_indicator_quit(void)
     hal_aw91xxx_quit();
 }
 
+/** Notification about imminent mce exit
+ */
+void
+mce_hybris_indicator_shutdown(void)
+{
+    hal_aw91xxx_quit();
+}
+
+/* Query type of indicator backend
+ *
+ * @return true if there are multiple leds, false otherwise
+ */
+bool
+mce_hybris_indicator_has_multiple_leds(void)
+{
+    bool has_multiple_leds = true;
+
+    mce_log(LL_DEBUG, "has_multiple_leds = %s", has_multiple_leds ? "true" : "false");
+
+    return has_multiple_leds;
+}
+
 /** Set indicator led pattern
  *
  * @param r     red intensity 0 ... 255
@@ -80,6 +104,8 @@ mce_hybris_indicator_set_pattern(int r, int g, int b, int ms_on, int ms_off)
     (void)ms_on;
     (void)ms_off;
 
+    // STUB: These calls are ignored on purpose
+
     return true;
 }
 
@@ -90,7 +116,11 @@ mce_hybris_indicator_set_pattern(int r, int g, int b, int ms_on, int ms_off)
 bool
 mce_hybris_indicator_can_breathe(void)
 {
-    return false;
+    bool can_breathe = true;
+
+    mce_log(LL_DEBUG, "can_breathe = %s", can_breathe ? "true" : "false");
+
+    return can_breathe;
 }
 
 /** Enable/disable sw breathing
@@ -100,7 +130,8 @@ mce_hybris_indicator_can_breathe(void)
 void
 mce_hybris_indicator_enable_breathing(bool enable)
 {
-    (void)enable;
+    mce_log(LL_DEBUG, "breathing = %s", enable ? "enabled" : "disabled");
+    hal_aw91xxx_indicator_enable_breathing(enable);
 }
 
 /** Set indicator led brightness
@@ -112,14 +143,15 @@ mce_hybris_indicator_enable_breathing(bool enable)
 bool
 mce_hybris_indicator_set_brightness(int level)
 {
-    (void)level;
-
+    mce_log(LL_DEBUG, "brightness = %d", level);
+    hal_aw91xxx_indicator_set_brightness(level);
     return true;
 }
 
 void
 mce_hybris_indicator_set_active(const char *pattern, bool active)
 {
+    mce_log(LL_DEBUG, "%s = %s", pattern, active ? "active" : "inactive");
     hal_aw91xxx_indicator_set_active(pattern, active);
 }
 
