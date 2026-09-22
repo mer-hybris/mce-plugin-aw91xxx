@@ -130,15 +130,14 @@ static const unsigned aw91xxx_led_color[AW91XXX_LED_COUNT] = {
 
 /** Static led brightness calibration
  *
- * Brightness of the leds is out of balance: blue is way too bright and
- * green is too dim -> tune maximums for each led based on eyeballing.
+ * Defaults to using full hw brightness range.
  */
 static int aw91xxx_led_calibration[AW91XXX_LED_COUNT] = {
-    [AW91XXX_LED_RED]    =  72,
-    [AW91XXX_LED_ORANGE] =  70,
-    [AW91XXX_LED_YELLOW] =  78,
-    [AW91XXX_LED_GREEN]  = 255,
-    [AW91XXX_LED_BLUE]   =  10,
+    [AW91XXX_LED_RED]    = AW91XXX_DIM_MAX,
+    [AW91XXX_LED_ORANGE] = AW91XXX_DIM_MAX,
+    [AW91XXX_LED_YELLOW] = AW91XXX_DIM_MAX,
+    [AW91XXX_LED_GREEN]  = AW91XXX_DIM_MAX,
+    [AW91XXX_LED_BLUE]   = AW91XXX_DIM_MAX,
 };
 
 /** Human readable names for leds, use via #aw91xxx_led_name() */
@@ -441,6 +440,29 @@ mce_patterns_load_config(void)
         g_strfreev(val_arr), val_arr = NULL, val_cnt = 0;
     }
     g_strfreev(key_arr), key_arr = NULL, key_cnt = 0;
+
+    /* Parse aw91xxx LED brightness configuration
+     *
+     * For more info see example at: inifiles/70-led-brightness-aw91xxx.ini
+     */
+    for( size_t i = 0; i < AW91XXX_LED_COUNT; ++i ) {
+        static const char group[] = MCE_CONF_AW91XX_LED_BRIGHTNESS_GROUP;
+        static const char * const keys[AW91XXX_LED_COUNT] = {
+            [AW91XXX_LED_RED]     = MCE_CONF_AW91XX_LED_BRIGHTNESS_RED,
+            [AW91XXX_LED_ORANGE]  = MCE_CONF_AW91XX_LED_BRIGHTNESS_ORANGE,
+            [AW91XXX_LED_YELLOW]  = MCE_CONF_AW91XX_LED_BRIGHTNESS_YELLOW,
+            [AW91XXX_LED_GREEN]   = MCE_CONF_AW91XX_LED_BRIGHTNESS_GREEN,
+            [AW91XXX_LED_BLUE]    = MCE_CONF_AW91XX_LED_BRIGHTNESS_BLUE,
+        };
+        gint val = mce_conf_get_int(group, keys[i], AW91XXX_DIM_MAX);
+        if( val < AW91XXX_DIM_MIN )
+            val = AW91XXX_DIM_MIN;
+        else if( val > AW91XXX_DIM_MAX )
+            val = AW91XXX_DIM_MAX;
+        aw91xxx_led_calibration[i] = val;
+
+        mce_log(LL_DEBUG, "[%s] %s = %d", group, keys[i], val);
+    }
 
     /* Reset sysfs bookkeeping and controls to a known state
      */

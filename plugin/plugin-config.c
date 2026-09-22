@@ -31,6 +31,7 @@ static void *lookup_function(const char *name);
 
 gchar **mce_conf_get_string_list(const gchar *group, const gchar *key, gsize *length);
 gchar **mce_conf_get_keys       (const gchar *group, gsize *length);
+gint    mce_conf_get_int        (const gchar *group, const gchar *key, const gint defaultval);
 
 /* ========================================================================= *
  * UTILITY
@@ -84,4 +85,14 @@ mce_conf_get_keys(const gchar *group, gsize *length)
         *length = 0;
 
     return real ? real(group, length) : NULL;
+}
+
+gint
+mce_conf_get_int(const gchar *group, const gchar *key, const gint defaultval)
+{
+    static gint (*real)(const gchar *, const gchar *, const gint) = NULL;
+
+    RESOLVE_FROM_MCE;
+
+    return real ? real(group, key, defaultval) : defaultval;
 }
