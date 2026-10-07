@@ -20,6 +20,8 @@
 
 #define MCE_CONF_LED_PATTERN_HYBRIS_GROUP "LEDPatternHybris"
 
+#define MCE_CONF_LED_PATTERN_AW91XX_GROUP "LEDPatternAW91XXX"
+
 #define MCE_CONF_AW91XX_LED_BRIGHTNESS_GROUP  "LEDBrightnesAW91XXX"
 #define MCE_CONF_AW91XX_LED_BRIGHTNESS_RED    "Red"
 #define MCE_CONF_AW91XX_LED_BRIGHTNESS_ORANGE "Orange"
@@ -38,5 +40,6 @@
 gchar **mce_conf_get_string_list(const gchar *group, const gchar *key, gsize *length);
 gchar **mce_conf_get_keys       (const gchar *group, gsize *length);
 gint    mce_conf_get_int        (const gchar *group, const gchar *key, const gint defaultval);
+gchar  *mce_conf_get_string     (const gchar *group, const gchar *key, const gchar *defaultval);
 
 #endif /* PLUGIN_CONFIG_H_ */

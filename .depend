@@ -1,24 +1,100 @@
+hal/effect_ctl.o:\
+	hal/effect_ctl.c\
+	plugin/plugin-logging.h\
+	hal/effect_ctl.h\
+	hal/effect_vcpu.h\
+	hal/hal-aw91xxx.h\
+	hal/led_pattern.h\
+
+hal/effect_ctl.pic.o:\
+	hal/effect_ctl.c\
+	plugin/plugin-logging.h\
+	hal/effect_ctl.h\
+	hal/effect_vcpu.h\
+	hal/hal-aw91xxx.h\
+	hal/led_pattern.h\
+
+hal/effect_mgr.o:\
+	hal/effect_mgr.c\
+	plugin/plugin-config.h\
+	plugin/plugin-logging.h\
+	hal/effect_ctl.h\
+	hal/effect_mgr.h\
+	hal/effect_vcpu.h\
+	hal/hal-aw91xxx.h\
+	hal/led_pattern.h\
+
+hal/effect_mgr.pic.o:\
+	hal/effect_mgr.c\
+	plugin/plugin-config.h\
+	plugin/plugin-logging.h\
+	hal/effect_ctl.h\
+	hal/effect_mgr.h\
+	hal/effect_vcpu.h\
+	hal/hal-aw91xxx.h\
+	hal/led_pattern.h\
+
+hal/effect_vcpu.o:\
+	hal/effect_vcpu.c\
+	plugin/plugin-logging.h\
+	hal/effect_ctl.h\
+	hal/effect_vcpu.h\
+	hal/hal-aw91xxx.h\
+	hal/led_pattern.h\
+
+hal/effect_vcpu.pic.o:\
+	hal/effect_vcpu.c\
+	plugin/plugin-logging.h\
+	hal/effect_ctl.h\
+	hal/effect_vcpu.h\
+	hal/hal-aw91xxx.h\
+	hal/led_pattern.h\
+
 hal/hal-aw91xxx.o:\
 	hal/hal-aw91xxx.c\
 	plugin/plugin-config.h\
 	plugin/plugin-logging.h\
+	hal/effect_mgr.h\
 	hal/hal-aw91xxx.h\
+	hal/led_pattern.h\
 
 hal/hal-aw91xxx.pic.o:\
 	hal/hal-aw91xxx.c\
 	plugin/plugin-config.h\
 	plugin/plugin-logging.h\
+	hal/effect_mgr.h\
 	hal/hal-aw91xxx.h\
+	hal/led_pattern.h\
+
+hal/led_pattern.o:\
+	hal/led_pattern.c\
+	plugin/plugin-config.h\
+	plugin/plugin-logging.h\
+	hal/effect_ctl.h\
+	hal/effect_mgr.h\
+	hal/hal-aw91xxx.h\
+	hal/led_pattern.h\
+
+hal/led_pattern.pic.o:\
+	hal/led_pattern.c\
+	plugin/plugin-config.h\
+	plugin/plugin-logging.h\
+	hal/effect_ctl.h\
+	hal/effect_mgr.h\
+	hal/hal-aw91xxx.h\
+	hal/led_pattern.h\
 
 plugin/plugin-api.o:\
 	plugin/plugin-api.c\
 	hal/hal-aw91xxx.h\
 	plugin/plugin-api.h\
+	plugin/plugin-logging.h\
 
 plugin/plugin-api.pic.o:\
 	plugin/plugin-api.c\
 	hal/hal-aw91xxx.h\
 	plugin/plugin-api.h\
+	plugin/plugin-logging.h\
 
 plugin/plugin-config.o:\
 	plugin/plugin-config.c\

@@ -45,6 +45,7 @@ COMMON   += -Wall
 COMMON   += -Wextra
 COMMON   += -Wmissing-prototypes
 COMMON   += -Wno-missing-field-initializers
+COMMON   += -Wno-switch # snr is bad due to XXX_COUNT enum values
 COMMON   += -Os
 COMMON   += -g
 COMMON   += -fvisibility=hidden
@@ -104,6 +105,9 @@ LDLIBS   += $(PKG_LDLIBS)
 %.i : %.q
 	cat $< | cproto -s | prettyproto.py > $@
 
+%.png : %.dot
+	dot -Tpng $< -o $@
+
 preprocess: $(patsubst %.c,%.q,$(wildcard */*.c))
 prototypes: $(patsubst %.c,%.p,$(wildcard */*.c))
 locals: $(patsubst %.c,%.i,$(wildcard */*.c))
@@ -117,9 +121,13 @@ hybris_OBJS += plugin/plugin-api.pic.o
 hybris_OBJS += plugin/plugin-config.pic.o
 hybris_OBJS += plugin/plugin-logging.pic.o
 
+hybris_OBJS += hal/effect_ctl.pic.o
+hybris_OBJS += hal/effect_mgr.pic.o
+hybris_OBJS += hal/effect_vcpu.pic.o
 hybris_OBJS += hal/hal-aw91xxx.pic.o
+hybris_OBJS += hal/led_pattern.pic.o
 
-#hybris.so : LDLIBS += -lm
+hybris.so : LDLIBS += -lm
 hybris.so : $(hybris_OBJS)
 
 install:: hybris.so
@@ -181,12 +189,20 @@ order::
 .SUFFIXES: %.q %.p %.g
 
 PROTO_CPPFLAGS += $(CPPFLAGS)
-PROTO_CPPFLAGS += -D_Float32=float
-PROTO_CPPFLAGS += -D_Float64=double
-PROTO_CPPFLAGS += -D_Float128="long double"
-PROTO_CPPFLAGS += -D_Float32x=float
-PROTO_CPPFLAGS += -D_Float64x=double
-PROTO_CPPFLAGS += -D_Float128x="long double"
+PROTO_CPPFLAGS += -D _Float32=float
+PROTO_CPPFLAGS += -D _Float64=double
+PROTO_CPPFLAGS += -D _Float128="long double"
+PROTO_CPPFLAGS += -D _Float32x=float
+PROTO_CPPFLAGS += -D _Float64x=double
+PROTO_CPPFLAGS += -D _Float128x="long double"
+PROTO_CPPFLAGS += -D __sv_f32_t=float
+PROTO_CPPFLAGS += -D __sv_f64_t=double
+PROTO_CPPFLAGS += -D __sv_bool_t=bool
+PROTO_CPPFLAGS += -D __SVBool_t=bool
+PROTO_CPPFLAGS += -D __SVFloat32_t=float
+PROTO_CPPFLAGS += -D __SVFloat64_t=double
+PROTO_CPPFLAGS += -D __Float32x4_t=float
+PROTO_CPPFLAGS += -D __Float64x2_t=double
 
 %.q : %.c ; $(CC) -o $@ -E $< $(PROTO_CPPFLAGS)
 %.p : %.q ; cproto -s < $< | prettyproto.py | tee $@
