@@ -1,6 +1,6 @@
 Name:       mce-plugin-aw91xxx
 Summary:    AW91XXX LED plugin for Mode Control Entity
-Version:    1.0.0
+Version:    1.1.0
 Release:    1
 License:    LGPLv2
 URL:        https://github.com/mer-hybris/mce-plugin-aw91xxx
