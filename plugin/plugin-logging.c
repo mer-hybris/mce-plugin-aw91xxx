@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <dlfcn.h>
 
 /* ========================================================================= *
  * Prototypes
@@ -24,7 +25,8 @@
  * MCE_LOGGING_API
  * ------------------------------------------------------------------------- */
 
-void mce_hybris_log(int lev, const char *file, const char *func, const char *fmt, ...) __attribute__ ((format (printf, 4, 5)));
+void mce_hybris_log   (int lev, const char *file, const char *func, const char *fmt, ...) __attribute__ ((format (printf, 4, 5)));
+int  mce_hybris_log_p_(int lev, const char *const file, const char *const function);
 
 /* ========================================================================= *
  * Data
@@ -73,4 +75,30 @@ mce_hybris_log(int lev, const char *file, const char *func, const char *fmt, ...
       fprintf(stderr, "%s: %s: %s\n", file, func, msg);
     free(msg);
   }
+}
+
+/** Log level testing predicate
+ *
+ * For testing whether given level of logging is allowed
+ * before spending cpu time for gathering parameters etc
+ *
+ * @param loglevel level of logging we might do
+ *
+ * @return 1 if logging at given level is enabled, 0 if not
+ */
+int
+mce_hybris_log_p_(int lev, const char *const file, const char *const function)
+{
+    const char  lookup_name[] = "mce_log_p_";
+    static bool lookup_done   = false;
+
+    static int  (*real)(loglevel_t, const char *const, const char *const) = NULL;
+
+    if( !lookup_done ) {
+        lookup_done = true;
+        if( !(real = dlsym(RTLD_DEFAULT, lookup_name)) )
+            mce_log(LL_ERR, "mce does not export: %s(): %s", lookup_name, dlerror());
+    }
+
+    return real ? real(lev, file, function) : 1;
 }

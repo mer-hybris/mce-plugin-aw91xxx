@@ -226,13 +226,11 @@ aw91xxx_sysfs_set_brightness(Aw91xxxLedIndex index, int val)
             // Note: dim_store() in kernel driver accepts only hexadecimal values!
             char txt[32];
             snprintf(txt, sizeof txt, "0x%02x 0x%02x", (int)index, val);
-            uint64_t t = boottime();
+            uint64_t t = mce_log_p(LL_DEBUG) ? boottime() : 0;
             if( write(aw91xxx_sysfs_dim_fd, txt, strlen(txt)) == -1 ) {
                 // dontcare (and driver never returns error anyway)
             }
-            t = boottime() - t;
-
-            mce_log(LL_DEBUG, "%s: brightness: %d (T+%u)", aw91xxx_led_name(index), val, (unsigned)t);
+            mce_log(LL_DEBUG, "%s: brightness: %d (T+%u)", aw91xxx_led_name(index), val, (unsigned)(boottime() - t));
         }
     }
 }
