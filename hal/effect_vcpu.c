@@ -521,7 +521,7 @@ effect_vcpu_advance_clock(EffectVCPU *self, unsigned tick)
 
             output = effect_vcpu_evaluate_output_rising(self, t);
         }
-        else if( tick <= self->vcp_function_high_ends ) {
+        else if( tick < self->vcp_function_high_ends ) {
             // High time
             output = effect_vcpu_evaluate_output_high(self);
         }
@@ -533,7 +533,7 @@ effect_vcpu_advance_clock(EffectVCPU *self, unsigned tick)
 
             output = effect_vcpu_evaluate_output_falling(self, t);
         }
-        else if( tick <= self->vcp_function_low_ends ) {
+        else if( tick < self->vcp_function_low_ends ) {
             // Low time
             output = effect_vcpu_evaluate_output_low(self);
         }
@@ -543,12 +543,16 @@ effect_vcpu_advance_clock(EffectVCPU *self, unsigned tick)
             effect_vcpu_start_function(self, tick);
         }
         else {
+            // Make sure output gets down if function had fall/low phase
+            if( self->vcp_setup_fall_time || self->vcp_setup_low_time )
+                effect_vcpu_set_output(self, 0);
+
             // Execute until opcode with wait state hit
             effect_vcpu_reset_function(self);
             effect_vcpu_execute_block(self, tick);
-            // Do not lose output in case of halt
-            if( effect_vcpu_is_halted(self) )
-                output = effect_vcpu_get_output(self);
+
+            // Do not lose output in case of halt / chained exec
+            output = effect_vcpu_get_output(self);
         }
 
         effect_vcpu_set_output(self, output);
@@ -668,18 +672,20 @@ static void
 effect_vcpu_reset_config(EffectVCPU *self)
 {
     // reset configuration state
-    self->vcp_setup_amplitude  = EFFECT_DEFAULT_AMPLITUDE;
-    self->vcp_setup_rise_time  = 0;
-    self->vcp_setup_high_time  = 0;
-    self->vcp_setup_fall_time  = 0;
-    self->vcp_setup_low_time   = 0;
-    self->vcp_setup_count      = EFFECT_DEFAULT_COUNT;
     self->vcp_setup_deactivate = UINT_MAX;
 }
 
 static void
 effect_vcpu_reset_function(EffectVCPU *self)
 {
+    // reset configuration state
+    self->vcp_setup_amplitude  = EFFECT_DEFAULT_AMPLITUDE;
+    self->vcp_setup_rise_time  = 0;
+    self->vcp_setup_high_time  = 0;
+    self->vcp_setup_fall_time  = 0;
+    self->vcp_setup_low_time   = 0;
+    self->vcp_setup_count      = EFFECT_DEFAULT_COUNT;
+
     // reset execution state
     self->vcp_function_type      = FUNCTION_DELAY;
     self->vcp_function_start     = 0;
@@ -875,9 +881,7 @@ effect_compiler_compile_sub(EffectCompiler *self, const char *srce)
         case COMMAND_DELAY:
             opc = OPCODE_DELAY;
             arg = get_ticks(&srce);
-            if( arg > 0 )
-                arg -= 1;
-            else
+            if( arg == 0 )
                 opc = OPCODE_NOP;
             break;
         case COMMAND_AMPLITUDE:
