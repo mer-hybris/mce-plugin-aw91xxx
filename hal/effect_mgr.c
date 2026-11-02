@@ -135,10 +135,15 @@ effect_mgr_sync_to_leds(EffectMgr *self)
                     continue;
 
                 EffectVCPU *vcpu = effect_ctl_get_vcpu(control, led);
-                if( vcpu ) {
-                    reserved.ls_active[led] = true;
-                    state.ls_active[led]    = effect_vcpu_get_output(vcpu);
-                }
+                if( !vcpu )
+                    continue;
+
+                int output = effect_vcpu_get_output(vcpu);
+                if( output < 0 )
+                    continue;
+
+                reserved.ls_active[led] = true;
+                state.ls_active[led]    = output;
             }
         }
 
