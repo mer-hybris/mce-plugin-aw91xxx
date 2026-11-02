@@ -43,6 +43,7 @@ enum {
     COMMAND_POWEROFF    = 'X', // X
     COMMAND_EXPIRY      = 'e', // e<ms>
     COMMAND_DELAY       = 'd', // d<ms>   ; "d0" compiles to NOP -> same as "N"
+    COMMAND_PAUSE       = 'p', // p<ms>   ; "p0" compiles to NOP -> same as "N"
     COMMAND_AMPLITUDE   = 'a', // a<val>  ; val = 0-255
     COMMAND_RISE_TIME   = 'r', // r<ms>
     COMMAND_HIGH_TIME   = 'h', // h<ms>
@@ -54,6 +55,7 @@ enum {
 
 typedef enum {
     FUNCTION_DELAY,
+    FUNCTION_PAUSE,
     FUNCTION_FIXED,
     FUNCTION_RECTANGLE,
     FUNCTION_TRIANGLE,
@@ -72,6 +74,7 @@ enum {
 
     OPCODE_EXPIRY      = 0x10 | OPCODE_HAS_VALUE | OPCODE_IS_SETUP,
     OPCODE_DELAY       = 0x11 | OPCODE_HAS_VALUE,
+    OPCODE_PAUSE       = 0x12 | OPCODE_HAS_VALUE,
 
     OPCODE_AMPLITUDE   = 0x20 | OPCODE_HAS_VALUE | OPCODE_IS_SETUP,
     OPCODE_RISE_TIME   = 0x21 | OPCODE_HAS_VALUE | OPCODE_IS_SETUP,
@@ -227,6 +230,7 @@ static const char *effect_function_name(EffectFunction value)
 {
     static const char * const lut[] = {
         [FUNCTION_DELAY]     = "FUNCTION_DELAY",
+        [FUNCTION_PAUSE]     = "FUNCTION_PAUSE",
         [FUNCTION_FIXED]     = "FUNCTION_FIXED",
         [FUNCTION_RECTANGLE] = "FUNCTION_RECTANGLE",
         [FUNCTION_TRIANGLE]  = "FUNCTION_TRIANGLE",
@@ -248,6 +252,7 @@ static const char *effect_opcode_name(unsigned value)
         HANDLE(OPCODE_RESTART);
         HANDLE(OPCODE_EXPIRY);
         HANDLE(OPCODE_DELAY);
+        HANDLE(OPCODE_PAUSE);
         HANDLE(OPCODE_AMPLITUDE);
         HANDLE(OPCODE_RISE_TIME);
         HANDLE(OPCODE_HIGH_TIME);
@@ -352,6 +357,10 @@ effect_vcpu_evaluate_output_rising(EffectVCPU *self, float input)
         output = 0;
         break;
 
+    case FUNCTION_PAUSE:
+        output = -1;
+        break;
+
     case FUNCTION_FIXED:
         output = self->vcp_setup_amplitude;
         break;
@@ -387,6 +396,10 @@ effect_vcpu_evaluate_output_high(EffectVCPU *self)
         output = 0;
         break;
 
+    case FUNCTION_PAUSE:
+        output = -1;
+        break;
+
     case FUNCTION_FIXED:
     case FUNCTION_RECTANGLE:
     case FUNCTION_SINE:
@@ -408,6 +421,10 @@ effect_vcpu_evaluate_output_falling(EffectVCPU *self, float input)
     switch( self->vcp_function_type ) {
     case FUNCTION_DELAY:
         output = 0;
+        break;
+
+    case FUNCTION_PAUSE:
+        output = -1;
         break;
 
     case FUNCTION_FIXED:
@@ -443,6 +460,10 @@ effect_vcpu_evaluate_output_low(EffectVCPU *self)
     switch( self->vcp_function_type ) {
     case FUNCTION_DELAY:
         output = 0;
+        break;
+
+    case FUNCTION_PAUSE:
+        output = -1;
         break;
 
     case FUNCTION_FIXED:
@@ -612,6 +633,13 @@ effect_vcpu_execute_opcode(EffectVCPU *self, unsigned tick)
 
     case OPCODE_DELAY:
         self->vcp_function_type    = FUNCTION_DELAY;
+        self->vcp_function_repeats = 0;
+
+        effect_vcpu_start_delay(self, tick, value);
+        break;
+
+    case OPCODE_PAUSE:
+        self->vcp_function_type    = FUNCTION_PAUSE;
         self->vcp_function_repeats = 0;
 
         effect_vcpu_start_delay(self, tick, value);
@@ -884,6 +912,12 @@ effect_compiler_compile_sub(EffectCompiler *self, const char *srce)
             if( arg == 0 )
                 opc = OPCODE_NOP;
             break;
+        case COMMAND_PAUSE:
+            opc = OPCODE_PAUSE;
+            arg = get_ticks(&srce);
+            if( arg == 0 )
+                opc = OPCODE_NOP;
+            break;
         case COMMAND_AMPLITUDE:
             opc = OPCODE_AMPLITUDE;
             arg = get_num(&srce);
@@ -946,7 +980,7 @@ effect_compiler_compile_sub(EffectCompiler *self, const char *srce)
             goto EXIT;
         }
 
-        if( opc == OPCODE_HALT || opc == COMMAND_RESTART )
+        if( opc == OPCODE_HALT || opc == OPCODE_RESTART )
             led = -1;
     }
 
